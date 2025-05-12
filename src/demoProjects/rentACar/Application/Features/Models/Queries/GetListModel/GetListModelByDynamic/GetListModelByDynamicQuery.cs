@@ -2,6 +2,7 @@
 using Application.Services.Repositories;
 using AutoMapper;
 using Core.Application.Requests;
+using Core.Persistence.Dynamic;
 using Core.Persistence.Paging;
 using Domain.Entities;
 using MediatR;
@@ -14,8 +15,9 @@ using System.Threading.Tasks;
 
 namespace Application.Features.Models.Queries.GetListModel.GetListModelByDynamic
 {
-    public class GetListModelByDynamicQuery :IRequest<ModelListModel>
+    public class GetListModelByDynamicQuery : IRequest<ModelListModel>
     {
+        public Dynamic Dynamic { get; set; }
         public PageRequest PageRequest { get; set; }
         public class GetListModelQueryHandler : IRequestHandler<GetListModelByDynamicQuery, ModelListModel>
         {
@@ -30,7 +32,7 @@ namespace Application.Features.Models.Queries.GetListModel.GetListModelByDynamic
             public async Task<ModelListModel> Handle(GetListModelByDynamicQuery request, CancellationToken cancellationToken)
             {
                 //car models
-                IPaginate<Model> models = await _modelRepository.GetListAsync(include:
+                IPaginate<Model> models = await _modelRepository.GetListByDynamicAsync(request.Dynamic, include:
                                                      m => m.Include(c => c.Brand),
                                                      index: request.PageRequest.Page,
                                                      size: request.PageRequest.PageSize
@@ -39,4 +41,6 @@ namespace Application.Features.Models.Queries.GetListModel.GetListModelByDynamic
                 ModelListModel model = _mapper.Map<ModelListModel>(models);
                 return model;
             }
+        }
+    }
 }
